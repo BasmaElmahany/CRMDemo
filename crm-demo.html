@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة قياس وتحليلات المبيعات | Soft 3D CRM</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js للمخططات البيانية المتعددة -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- خط Tajawal العربي -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        clayCanvas: '#fcf8f2',
+                        claySidebar: '#d9e8e2',
+                        clayCardBg: '#fefdfb',
+                        clayTextDark: '#4a443e',
+                        clayTextMuted: '#968c83',
+                        claySage: '#88ab9d',
+                        clayPeach: '#f8b69b',
+                        clayCoral: '#f58a69',
+                        clayYellow: '#fce3b8',
+                        clayMint: '#d4ebd9',
+                        clayBlue: '#bed3e8',
+                    },
+                    boxShadow: {
+                        'clay-soft': '6px 6px 14px rgba(210, 195, 180, 0.4), -6px -6px 14px rgba(255, 255, 255, 0.95)',
+                        'clay-inset': 'inset 3px 3px 6px rgba(210, 195, 180, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.95)',
+                        'clay-pill': '4px 4px 10px rgba(210, 195, 180, 0.5), -3px -3px 8px rgba(255, 255, 255, 0.9)',
+                        'clay-card-flat': '8px 8px 18px rgba(215, 200, 185, 0.35), -6px -6px 16px rgba(255, 255, 255, 0.95)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #d7c9bb; border-radius: 12px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bfaea0; }
+
+        .active-clay-tab {
+            background-color: #ffffff !important;
+            color: #4a443e !important;
+            box-shadow: 4px 4px 10px rgba(180, 195, 190, 0.5), -3px -3px 8px rgba(255, 255, 255, 0.95) !important;
+            font-weight: 800 !important;
+        }
+
+        .drawer-collapsed {
+            width: 88px !important;
+        }
+        .drawer-collapsed .drawer-hide {
+            display: none !important;
+        }
+
+        .whatsapp-bg {
+            background-color: #efeae2;
+            background-image: radial-gradient(#d1c7b7 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.01); }
+        }
+        .animate-float {
+            animation: floatCard 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#f5ede4] text-clayTextDark font-sans min-h-screen flex items-center justify-center p-2 sm:p-4 antialiased">
+
+    <!-- نافذة التطبيق الرئيسية -->
+    <div class="w-full max-w-[1600px] h-[95vh] bg-clayCanvas rounded-[44px] shadow-clay-card-flat flex overflow-hidden border-[6px] border-white relative">
+
+        <!-- 1. شاشة تسجيل الدخول (مع حركات وموشن مميزة) -->
+        <div id="authScreen" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-[#ede5db]/85 backdrop-blur-md transition-all duration-700">
+            <div class="bg-clayCardBg border-4 border-white p-8 sm:p-10 rounded-[40px] shadow-clay-card-flat w-full max-w-md text-center animate-float relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-clayPeach/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-claySage/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="w-20 h-20 bg-clayPeach/40 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-clay-soft border-2 border-white transition-transform duration-500 hover:rotate-12">
+                    🎧
+                </div>
+                <h2 class="text-2xl font-black text-clayTextDark mb-1">تسجيل الدخول للمنظومة</h2>
+                <p class="text-clayTextMuted text-xs font-bold mb-6">Pastel 3D Estate CRM & Analytics Suite</p>
+
+                <div class="space-y-4 text-right">
+                    <div>
+                        <label class="block text-xs font-black text-clayTextDark mb-1 mr-1">نوع المستخدم والصلاحية (Role)</label>
+                        <select id="loginRole" class="w-full bg-[#f6eee3] border border-white rounded-2xl px-4 py-3 text-xs font-bold text-clayTextDark outline-none shadow-clay-inset focus:ring-2 focus:ring-clayPeach transition">
+                            <option value="seller">مسؤول مبيعات (Seller - بسمة خلف)</option>
+                            <option value="admin">مدير المبيعات العام والرقابة (Admin - م. أحمد رشاد)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-clayTextDark mb-1 mr-1">البريد الإلكتروني</label>
+                        <input type="email" id="loginEmail" value="seller@estatecrm.com" class="w-full bg-[#f6eee3] border border-white rounded-2xl px-4 py-3 text-xs font-bold text-clayTextDark outline-none shadow-clay-inset transition focus:scale-[1.01]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-clayTextDark mb-1 mr-1">كلمة المرور</label>
+                        <input type="password" value="••••••••••••" class="w-full bg-[#f6eee3] border border-white rounded-2xl px-4 py-3 text-xs text-clayTextDark outline-none shadow-clay-inset transition focus:scale-[1.01]">
+                    </div>
+                    <button onclick="handleLoginSubmit()" class="w-full mt-2 bg-gradient-to-r from-clayPeach to-clayCoral hover:opacity-95 active:scale-95 text-white font-black py-3.5 rounded-2xl shadow-clay-pill transition-all duration-300 flex items-center justify-center gap-2">
+                        <span>دخول للمنصة</span>
+                        <i class="fa-solid fa-arrow-left text-xs animate-pulse"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. الشريط الجانبي (Sidebar) -->
+        <aside id="mainDrawer" class="w-64 bg-claySidebar flex flex-col justify-between p-5 border-l border-white/60 transition-all duration-300 z-30 shrink-0 shadow-sm">
+            <div>
+                <div class="text-center pb-5 mb-5 border-b border-white/40">
+                    <div class="w-20 h-20 rounded-full mx-auto p-1 bg-white shadow-clay-soft overflow-hidden border-2 border-white mb-2 relative">
+                        <img id="avatarImage" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Mia&backgroundColor=d9e8e2" class="w-full h-full object-cover" alt="3D Avatar">
+                        <span class="absolute bottom-0 right-0 w-5 h-5 bg-clayCoral rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white">✨</span>
+                    </div>
+                    <div class="drawer-hide">
+                        <h3 class="text-sm font-black text-clayTextDark" id="sidebarGreeting">Hi, Basma! 🌸</h3>
+                        <p class="text-[10px] font-bold text-clayTextMuted" id="sidebarGreetingSub">جاهزة لإنجاز صفقات اليوم؟</p>
+                    </div>
+                </div>
+
+                <nav class="space-y-2 text-xs font-bold text-clayTextDark">
+                    <!-- روابط السيلر -->
+                    <div id="sellerNavSection" class="space-y-2">
+                        <button onclick="switchTab('seller-deals')" id="btn-seller-deals" class="nav-item active-clay-tab w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition">
+                            <i class="fa-solid fa-house text-claySage text-sm shrink-0"></i>
+                            <span class="drawer-hide">صفقاتي والمكالمات</span>
+                        </button>
+                        <button onclick="switchTab('seller-attendance')" id="btn-seller-attendance" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-regular fa-clock text-clayCoral text-sm shrink-0"></i>
+                            <span class="drawer-hide">تسجيل الوردية (8 ساعات)</span>
+                        </button>
+                        <button onclick="switchTab('seller-calendar')" id="btn-seller-calendar" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-regular fa-calendar-check text-amber-600 text-sm shrink-0"></i>
+                            <span class="drawer-hide">المواعيد والمعاينات</span>
+                        </button>
+                        <button onclick="switchTab('chat')" id="btn-chat" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <div class="flex items-center gap-3.5">
+                                <i class="fa-brands fa-whatsapp text-emerald-600 text-sm shrink-0"></i>
+                                <span class="drawer-hide">صندوق المحادثات</span>
+                            </div>
+                            <span class="drawer-hide bg-clayCoral text-white text-[9px] px-2 py-0.5 rounded-full font-black">2</span>
+                        </button>
+                    </div>
+
+                    <!-- روابط الأدمن -->
+                    <div id="adminNavGroup" class="hidden space-y-2 pt-2 border-t border-white/40">
+                        <span class="drawer-hide px-3 text-[10px] font-black text-clayTextMuted block mb-1">الرقابة والتحليلات</span>
+
+                        <button onclick="switchTab('admin-analytics')" id="btn-admin-analytics" class="nav-item active-clay-tab w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition">
+                            <i class="fa-solid fa-chart-pie text-claySage text-sm shrink-0"></i>
+                            <span class="drawer-hide">لوحة القياسات الشاملة</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-users-manage')" id="btn-admin-users-manage" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-user-plus text-clayCoral text-sm shrink-0"></i>
+                            <span class="drawer-hide">إضافة وإدارة المستخدمين</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-monitoring')" id="btn-admin-monitoring" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-binoculars text-blue-600 text-sm shrink-0"></i>
+                            <span class="drawer-hide">متابعة الصفقات وحذف العملاء</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-staff-attendance')" id="btn-admin-staff-attendance" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-user-clock text-amber-600 text-sm shrink-0"></i>
+                            <span class="drawer-hide">سجل حضور الموظفين (فحص)</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-salaries')" id="btn-admin-salaries" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-money-check-dollar text-emerald-600 text-sm shrink-0"></i>
+                            <span class="drawer-hide">سجل الرواتب والتحويلات</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-duplicates')" id="btn-admin-duplicates" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-box-archive text-rose-500 text-sm shrink-0"></i>
+                            <span class="drawer-hide">حسم النزاع والأرشيف</span>
+                        </button>
+
+                        <button onclick="switchTab('admin-audit-log')" id="btn-admin-audit-log" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-white/50 transition">
+                            <i class="fa-solid fa-fingerprint text-slate-500 text-sm shrink-0"></i>
+                            <span class="drawer-hide">سجل التدقيق الشامل (Audit)</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- زر تسجيل الخروج -->
+            <div class="pt-4 border-t border-white/40">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl bg-white/70 hover:bg-rose-50 text-rose-600 font-black text-xs shadow-clay-soft hover:shadow-clay-inset transition border border-white">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span class="drawer-hide">تسجيل الخروج</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-clayCanvas">
+
+            <!-- الهيدر العلوي -->
+            <header class="px-8 pt-7 pb-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleDrawer()" class="w-10 h-10 rounded-2xl bg-white border border-white text-clayTextDark flex items-center justify-center shadow-clay-soft hover:shadow-clay-inset transition">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2 class="text-2xl font-black text-clayTextDark tracking-tight" id="headerTitle">Dashboard</h2>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden sm:block w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute right-4 top-3 text-clayTextMuted text-xs"></i>
+                        <input type="text" id="globalTopSearch" onkeyup="handleGlobalSearch()" placeholder="بحث سريع في الصفقات والعملاء..." class="w-full pr-10 pl-4 py-2 rounded-2xl bg-[#f6eee3] border border-white text-xs font-bold text-clayTextDark outline-none shadow-clay-inset focus:ring-2 focus:ring-clayPeach">
+                    </div>
+
+                    <!-- جرس الإشعارات (عريض مع سكرولر وتأثير باهت عند النقر) -->
+                    <div class="relative">
+                        <button onclick="toggleNotificationDropdown()" class="w-11 h-11 rounded-2xl bg-white border border-white flex items-center justify-center text-clayTextMuted shadow-clay-soft relative">
+                            <i class="fa-regular fa-bell text-sm"></i>
+                            <span id="notifBadge" class="w-4 h-4 bg-clayCoral text-white rounded-full text-[9px] font-black flex items-center justify-center absolute -top-1 -right-1 border border-white shadow">3</span>
+                        </button>
+
+                        <div id="notificationDropdownMenu" class="hidden absolute left-0 mt-3 w-96 bg-white rounded-3xl p-4 shadow-clay-card-flat border-2 border-white z-50 space-y-2 max-h-72 overflow-y-auto">
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-100 text-xs font-black sticky top-0 bg-white z-10">
+                                <span>إشعارات المنظومة والعملاء</span>
+                                <span class="text-clayCoral text-[10px]" id="notifCountText">3 غير مقروءة</span>
+                            </div>
+                            
+                            <div onclick="markAsRead(this)" class="notif-item p-3 rounded-2xl bg-clayYellow/40 text-xs font-bold text-amber-950 border border-amber-200 cursor-pointer transition hover:scale-[0.99] flex items-start gap-2">
+                                <span class="text-base">⚠️</span>
+                                <div>
+                                    <strong class="block">تنبيه تدوير (90 يوماً):</strong>
+                                    <p class="text-[11px] text-amber-900 mt-0.5">العميل ياسر جلال أتم 89 يوماً؛ سيتم تدويره غداً تلقائياً.</p>
+                                </div>
+                            </div>
+
+                            <div onclick="markAsRead(this)" class="notif-item p-3 rounded-2xl bg-clayMint/60 text-xs font-bold text-emerald-950 border border-emerald-200 cursor-pointer transition hover:scale-[0.99] flex items-start gap-2">
+                                <span class="text-base">📅</span>
+                                <div>
+                                    <strong class="block">موعد معاينة مجدول:</strong>
+                                    <p class="text-[11px] text-emerald-900 mt-0.5">م. أحمد سامي - كمبوند بادية بالم هيلز الساعة 3:00 م.</p>
+                                </div>
+                            </div>
+
+                            <div onclick="markAsRead(this)" class="notif-item p-3 rounded-2xl bg-clayPeach/40 text-xs font-bold text-rose-950 border border-rose-200 cursor-pointer transition hover:scale-[0.99] flex items-start gap-2">
+                                <span class="text-base">💬</span>
+                                <div>
+                                    <strong class="block">رسالة واتساب جديدة:</strong>
+                                    <p class="text-[11px] text-rose-900 mt-0.5">نادية الشربيني بانتظار جدول أقساط لافيستا سيتي.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-11 h-11 rounded-2xl bg-white border border-white flex items-center justify-center shadow-clay-soft overflow-hidden p-1">
+                        <img id="headerUserAvatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Mia&backgroundColor=d9e8e2" class="w-full h-full rounded-xl object-cover" alt="User Avatar">
+                    </div>
+                </div>
+            </header>
+
+            <!-- الشاشات والمحتوى -->
+            <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
+
+                <!-- 1. داشبورد القياسات التحليلية (للأدمن) -->
+                <section id="view-admin-analytics" class="screen-view space-y-6">
+                    <div class="bg-gradient-to-r from-[#fae7d8] via-[#f7dfce] to-[#f4d5c0] rounded-[36px] p-6 border-4 border-white shadow-clay-card-flat flex items-center justify-between relative overflow-hidden">
+                        <div class="flex items-center gap-6 z-10">
+                            <div class="w-24 h-24 bg-white/70 rounded-3xl p-1 shadow-clay-soft flex items-center justify-center border-2 border-white shrink-0">
+                                <span class="text-5xl">📊</span>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-xs font-black text-clayCoral flex items-center gap-1.5">
+                                    <span>لوحة القياسات المركزية</span> <span>✨</span>
+                                </span>
+                                <h3 class="text-xl font-black text-clayTextDark">تحليلات الأداء المالي والتشغيلي الشامل</h3>
+                                <p class="text-xs font-bold text-clayTextMuted">استعراض كافة المؤشرات، معدلات الإغلاق، ومقارنات المشروعات عبر الرسوم البيانية المتعددة.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- كروت المؤشرات العلوية -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-clayMint/50 rounded-[30px] p-5 border-2 border-white shadow-clay-soft flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-claySage text-lg shadow-clay-pill border border-clayMint">💰</div>
+                            <div>
+                                <span class="text-[10px] font-black text-clayTextMuted block">إجمالي المبيعات المعتمدة</span>
+                                <h4 class="text-xl font-black text-clayTextDark">142.5M ج.م</h4>
+                                <span class="text-[10px] font-black text-emerald-600">+24% عن الشهر السابق</span>
+                            </div>
+                        </div>
+                        <div class="bg-clayPeach/30 rounded-[30px] p-5 border-2 border-white shadow-clay-soft flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-clayCoral text-lg shadow-clay-pill border border-clayPeach">🤝</div>
+                            <div>
+                                <span class="text-[10px] font-black text-clayTextMuted block">الصفقات المغلقة (Won)</span>
+                                <h4 class="text-xl font-black text-clayTextDark">42 صفقة</h4>
+                                <span class="text-[10px] font-black text-clayCoral">متوسط سلة 3.4M</span>
+                            </div>
+                        </div>
+                        <div class="bg-clayYellow/40 rounded-[30px] p-5 border-2 border-white shadow-clay-soft flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-600 text-lg shadow-clay-pill border border-clayYellow">📞</div>
+                            <div>
+                                <span class="text-[10px] font-black text-clayTextMuted block">إجمالي المكالمات الشهرية</span>
+                                <h4 class="text-xl font-black text-clayTextDark">1,840 مكالمة</h4>
+                                <span class="text-[10px] font-black text-amber-700">معدل رد 78%</span>
+                            </div>
+                        </div>
+                        <div class="bg-clayBlue/30 rounded-[30px] p-5 border-2 border-white shadow-clay-soft flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 text-lg shadow-clay-pill border border-clayBlue">⭐</div>
+                            <div>
+                                <span class="text-[10px] font-black text-clayTextMuted block">معدل رضا العملاء</span>
+                                <h4 class="text-xl font-black text-clayTextDark">4.9 / 5.0</h4>
+                                <span class="text-[10px] font-black text-blue-700">بناءً على 120 تقييم</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- صف الرسومات البيانية -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <div class="lg:col-span-7 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <h4 class="text-sm font-black text-clayTextDark">مسار نمو المبيعات الأسبوعي (Growth Line Chart)</h4>
+                                    <span class="text-[10px] font-bold text-clayTextMuted">مقارنة حجم الإغلاقات بالأهداف المحددة</span>
+                                </div>
+                                <span class="text-[10px] bg-[#f6eee3] text-clayTextDark font-black px-3 py-1 rounded-xl shadow-clay-inset">أسبوعي ▾</span>
+                            </div>
+                            <div class="h-64 w-full relative mt-2">
+                                <canvas id="chartAdminGrowthLine"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-5 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-sm font-black text-clayTextDark">حالات الصفقات الحالية (Deal Stages Donut)</h4>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 my-auto">
+                                <div class="w-40 h-40 relative flex items-center justify-center mx-auto">
+                                    <canvas id="chartAdminStagesDonut"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- مقارنة أداء السيلرز بالأعمدة -->
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="text-sm font-black text-clayTextDark">مقارنة أداء مسؤولي المبيعات (Seller Performance Comparison)</h4>
+                                <span class="text-[10px] text-clayTextMuted font-bold">عدد الصفقات المحققة لكل موظف مقارنة بالتارجت</span>
+                            </div>
+                            <span class="text-[10px] bg-clayMint text-emerald-800 font-black px-3 py-1 rounded-xl">أداء حي</span>
+                        </div>
+                        <div class="h-56 w-full relative">
+                            <canvas id="chartAdminSellersBar"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. شاشة إضافة وإدارة المستخدمين (للأدمن) -->
+                <section id="view-admin-users-manage" class="screen-view hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                            <div class="border-b border-slate-100 pb-3">
+                                <h3 class="text-base font-black text-clayTextDark">إضافة مستخدم جديد للمنظومة</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">تسجيل موظف مبيعات (Seller) أو مدير نظام (Admin)</p>
+                            </div>
+
+                            <form onsubmit="handleCreateUserSubmit(event)" class="space-y-3 text-xs font-bold">
+                                <div>
+                                    <label class="block text-clayTextDark mb-1">الاسم بالكامل *</label>
+                                    <input type="text" id="newUserName" required placeholder="مثال: مروان الشافعي" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">البريد الإلكتروني *</label>
+                                        <input type="email" id="newUserEmail" required placeholder="user@domain.com" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">رقم الهاتف *</label>
+                                        <input type="tel" id="newUserPhone" required placeholder="01xxxxxxxxx" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">الدور والصلاحية (Role)</label>
+                                        <select id="newUserRole" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                            <option value="Seller">مسؤول مبيعات (Seller)</option>
+                                            <option value="Admin">مدير نظام (Admin)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">الراتب الأساسي (ج.م)</label>
+                                        <input type="number" id="newUserSalary" value="9000" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-clayTextDark mb-1">المستهدف الشهري (Target Leads Count)</label>
+                                    <input type="number" id="newUserTarget" value="120" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                                </div>
+                                <button type="submit" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                                    حفظ وتفعيل المستخدم
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-7 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base font-black text-clayTextDark">المستخدمين المسجلين في المنظومة</h3>
+                                <span class="text-xs bg-clayMint text-emerald-800 px-3 py-1 rounded-full font-black" id="totalUsersBadge">3 مستخدمين</span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right text-xs">
+                                    <thead>
+                                        <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                                            <th class="pb-3">الاسم والبريد</th>
+                                            <th class="pb-3">الصلاحية</th>
+                                            <th class="pb-3">الراتب</th>
+                                            <th class="pb-3">التارجت</th>
+                                            <th class="pb-3">الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="usersTableTbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. شاشة سجل الحضور وفحص الموظف (للأدمن) -->
+                <section id="view-admin-staff-attendance" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-base font-black text-clayTextDark">سجل دوام وحضور وغياب مسؤولي المبيعات</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">اضغط على بطاقة أي سيلر لاستعراض سجله وساعات عمله وسجل الأيام</p>
+                            </div>
+                            <span class="text-xs bg-clayYellow text-amber-900 px-3 py-1 rounded-full font-black">انقر على الكارد للفحص التفصيلي 🔍</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div onclick="openEmployeeAttendanceModal('بسمة خلف', 'Senior Sales Specialist', 22, 2, '98%')" class="p-5 rounded-[26px] bg-[#fbf6ef] border-2 border-white cursor-pointer hover:shadow-clay-inset transition shadow-clay-soft space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black text-clayTextDark">بسمة خلف</span>
+                                    <span class="text-[10px] bg-white text-clayCoral px-2 py-0.5 rounded-full font-black shadow-xs">اضغط للفحص 🔍</span>
+                                </div>
+                                <div class="text-2xl font-black text-clayCoral">22 يوم حضور</div>
+                                <div class="text-[11px] text-clayTextMuted font-bold flex justify-between">
+                                    <span>الغياب: 2 يوم</span>
+                                    <span class="text-emerald-600">التزام الـ 8 ساعات: 98%</span>
+                                </div>
+                            </div>
+
+                            <div onclick="openEmployeeAttendanceModal('كريم عادل', 'Sales Specialist', 20, 4, '90%')" class="p-5 rounded-[26px] bg-[#fbf6ef] border-2 border-white cursor-pointer hover:shadow-clay-inset transition shadow-clay-soft space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black text-clayTextDark">كريم عادل</span>
+                                    <span class="text-[10px] bg-white text-claySage px-2 py-0.5 rounded-full font-black shadow-xs">اضغط للفحص 🔍</span>
+                                </div>
+                                <div class="text-2xl font-black text-claySage">20 يوم حضور</div>
+                                <div class="text-[11px] text-clayTextMuted font-bold flex justify-between">
+                                    <span>الغياب: 4 أيام</span>
+                                    <span class="text-amber-700">التزام الـ 8 ساعات: 90%</span>
+                                </div>
+                            </div>
+
+                            <div onclick="openEmployeeAttendanceModal('محمد علي', 'Sales Specialist', 17, 7, '76%')" class="p-5 rounded-[26px] bg-[#fbf6ef] border-2 border-white cursor-pointer hover:shadow-clay-inset transition shadow-clay-soft space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black text-clayTextDark">محمد علي</span>
+                                    <span class="text-[10px] bg-white text-rose-500 px-2 py-0.5 rounded-full font-black shadow-xs">اضغط للفحص 🔍</span>
+                                </div>
+                                <div class="text-2xl font-black text-rose-500">17 يوم حضور</div>
+                                <div class="text-[11px] text-clayTextMuted font-bold flex justify-between">
+                                    <span>الغياب: 7 أيام (خصم)</span>
+                                    <span class="text-rose-600">التزام الـ 8 ساعات: 76%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. شاشة متابعة صفقات السيلرز وحذف العملاء (للأدمن) -->
+                <section id="view-admin-monitoring" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 class="text-base font-black text-clayTextDark">متابعة صفقات السيلرز والتواصل وحذف وتعديل العملاء</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">المدير يراقب ويتواصل مباشرة ويمتلك صلاحية حذف وتعديل بيانات وحالة العميل</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                                <input type="text" id="adminDealsSearchInput" onkeyup="filterAdminMonitoringDeals()" placeholder="بحث بالاسم أو الهاتف..." class="w-48 bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1.5 text-xs font-bold outline-none shadow-clay-inset focus:ring-2 focus:ring-clayPeach">
+                                <input type="date" id="adminDateFrom" onchange="filterAdminMonitoringDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1.5 text-xs font-bold shadow-clay-inset" title="من تاريخ تسجيل">
+                                <input type="date" id="adminDateTo" onchange="filterAdminMonitoringDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1.5 text-xs font-bold shadow-clay-inset" title="إلى تاريخ تسجيل">
+                                <select id="adminSellerFilter" onchange="filterAdminMonitoringDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1.5 text-xs font-bold outline-none shadow-clay-inset">
+                                    <option value="All">كل السيلرز</option>
+                                    <option value="بسمة خلف">بسمة خلف</option>
+                                    <option value="كريم عادل">كريم عادل</option>
+                                    <option value="محمد علي">محمد علي</option>
+                                </select>
+                                <select id="adminStageFilter" onchange="filterAdminMonitoringDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1.5 text-xs font-bold outline-none shadow-clay-inset">
+                                    <option value="All">كل المراحل</option>
+                                    <option value="تمت الصفقة (Won)">تمت الصفقة (Won)</option>
+                                    <option value="معاينة مجدولة">معاينة مجدولة</option>
+                                    <option value="تم التواصل">تم التواصل</option>
+                                    <option value="متابعة مستمرة">متابعة مستمرة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                                        <th class="pb-3">العميل والهاتف</th>
+                                        <th class="pb-3">تاريخ الإضافة</th>
+                                        <th class="pb-3">المشروع</th>
+                                        <th class="pb-3">الميزانية</th>
+                                        <th class="pb-3">السيلر</th>
+                                        <th class="pb-3">المرحلة</th>
+                                        <th class="pb-3 text-center">تواصل مباشر</th>
+                                        <th class="pb-3 text-center">تعديل</th>
+                                        <th class="pb-3 text-center">حذف نهائي</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="adminMonitoringTbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. شاشة صفقات السيلر وتوثيق المكالمات -->
+                <section id="view-seller-deals" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 class="text-base font-black text-clayTextDark">صفقاتي وتوثيق نتائج المكالمات</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">تحديد نتيجة الاتصال وتعديل بيانات وحالات الصفقات وتتبع أهدافك</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="text" id="sellerSearchInput" onkeyup="filterSellerDeals()" placeholder="بحث في صفقاتي..." class="w-40 bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1.5 text-xs font-bold outline-none shadow-clay-inset focus:ring-2 focus:ring-clayPeach">
+                                <input type="date" id="sellerDateFrom" onchange="filterSellerDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1.5 text-xs font-bold shadow-clay-inset" title="من تاريخ">
+                                <input type="date" id="sellerDateTo" onchange="filterSellerDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1.5 text-xs font-bold shadow-clay-inset" title="إلى تاريخ">
+                                <select id="sellerStageFilter" onchange="filterSellerDeals()" class="bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1.5 text-xs font-bold outline-none shadow-clay-inset">
+                                    <option value="All">كل المراحل</option>
+                                    <option value="جديد (New)">جديد (New)</option>
+                                    <option value="تم التواصل">تم التواصل</option>
+                                    <option value="معاينة مجدولة">معاينة مجدولة</option>
+                                    <option value="تمت الصفقة (Won)">تمت الصفقة (Won)</option>
+                                </select>
+                                <button onclick="openDealModal()" class="px-4 py-2 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black text-xs rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                                    + إضافة صفقة
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                                        <th class="pb-3">العميل والهاتف</th>
+                                        <th class="pb-3">تاريخ الإضافة</th>
+                                        <th class="pb-3">تاريخ الميلاد</th>
+                                        <th class="pb-3">المشروع</th>
+                                        <th class="pb-3">الميزانية</th>
+                                        <th class="pb-3">المرحلة</th>
+                                        <th class="pb-3">آخر اتصال</th>
+                                        <th class="pb-3">المكالمات</th>
+                                        <th class="pb-3 text-center">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="sellerDealsTbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. شاشة الحضور والدوام للسيلر -->
+                <section id="view-seller-attendance" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-6">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-slate-100">
+                            <div>
+                                <span class="text-xs font-bold text-clayTextMuted block">تسجيل الوردية الذكي</span>
+                                <h3 class="text-lg font-black text-clayTextDark mt-0.5">تسجيل بداية ونهاية وردية العمل اليومية (8 ساعات)</h3>
+                                <p class="text-xs text-clayCoral font-bold mt-1" id="attendanceStatusMsg">
+                                    <i class="fa-solid fa-circle-info ml-1"></i> الحالة الحالية: لم يتم تسجيل الدخول اليوم.
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button id="btnCheckIn" onclick="recordCheckIn()" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black text-xs shadow-clay-pill hover:opacity-95 transition">
+                                    <i class="fa-solid fa-right-to-bracket ml-1"></i> تسجيل بداية الدوام (Check-In)
+                                </button>
+                                <button id="btnCheckOut" onclick="recordCheckOut()" class="px-5 py-3 rounded-2xl bg-rose-500 text-white font-black text-xs shadow transition opacity-50 cursor-not-allowed" disabled>
+                                    <i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل نهاية الدوام (Check-Out)
+                                </button>
+                                <button onclick="simulateCompleteShift()" class="px-4 py-3 rounded-2xl bg-emerald-600 text-white font-black text-xs shadow hover:bg-emerald-700 transition" title="محاكاة إتمام 8 ساعات للتجربة الفورية">
+                                    ⚡ محاكاة 8 ساعات
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- جدول سجل الحضور والانصراف الخاص بالموظف -->
+                        <div>
+                            <h4 class="text-sm font-black text-clayTextDark mb-3">سجل وردياتك وأيام الحضور الشهرية</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right text-xs">
+                                    <thead>
+                                        <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                                            <th class="pb-3">التاريخ</th>
+                                            <th class="pb-3">وقت الدخول</th>
+                                            <th class="pb-3">وقت الخروج</th>
+                                            <th class="pb-3">إجمالي الساعات</th>
+                                            <th class="pb-3">حالة الوردية</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="sellerAttendanceLogsTbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. شاشة المواعيد والتقويم والمعاينات (للسيلر) -->
+                <section id="view-seller-calendar" class="screen-view hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-6 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                            <h3 class="text-base font-black text-clayTextDark">تنسيق موعد معاينة أو اجتماع جديد</h3>
+                            <form onsubmit="handleScheduleMeeting(event)" class="space-y-3 text-xs font-bold">
+                                <div>
+                                    <label class="block text-clayTextDark mb-1">اسم العميل *</label>
+                                    <input type="text" id="meetClientName" required placeholder="مثال: م. أحمد سامي" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">تاريخ الموعد *</label>
+                                        <input type="date" id="meetDate" required value="2026-09-08" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                                    </div>
+                                    <div>
+                                        <label class="block text-clayTextDark mb-1">الوقت *</label>
+                                        <input type="time" id="meetTime" required value="15:00" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-clayTextDark mb-1">نوع الموعد</label>
+                                    <select id="meetType" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                                        <option value="معاينة ميدانية">معاينة ميدانية للمشروع (Site Visit)</option>
+                                        <option value="اجتماع بمقر الشركة">اجتماع بمقر الشركة</option>
+                                        <option value="مكالمة زووم استشارية">مكالمة زووم استشارية</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                                    حفظ وتأكيد الموعد
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-6 bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-3">
+                            <h3 class="text-base font-black text-clayTextDark mb-2">المواعيد القادمة المسجلة</h3>
+                            <div class="space-y-3" id="meetingsListContainer">
+                                <div class="p-3.5 bg-[#fbf6ef] border-2 border-white rounded-2xl flex justify-between items-center text-xs font-bold shadow-clay-soft">
+                                    <div>
+                                        <div class="font-black text-clayTextDark">معاينة موقع: أحمد سامي</div>
+                                        <div class="text-[10px] text-clayCoral mt-0.5">كمبوند بادية بالم هيلز • الثلاثاء 8 سبتمبر 03:00 م</div>
+                                    </div>
+                                    <span class="bg-clayMint text-emerald-800 text-[10px] px-2.5 py-1 rounded-xl font-black">مؤكد</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. شاشة صندوق المحادثات الموحد (WhatsApp & Messenger) -->
+                <section id="view-chat" class="screen-view hidden h-[70vh]">
+                    <div class="grid grid-cols-12 gap-5 h-full">
+                        <div class="col-span-12 md:col-span-4 bg-white rounded-[32px] border-2 border-white shadow-clay-card-flat flex flex-col overflow-hidden p-4">
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                                <h4 class="text-xs font-black text-clayTextDark">صندوق المحادثات المباشرة</h4>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black">متصل الآن</span>
+                            </div>
+                            <div class="space-y-2 overflow-y-auto flex-1" id="chatConversationsList">
+                                <div onclick="selectActiveChat('م. أحمد سامي', 'WhatsApp')" class="p-3 rounded-2xl bg-[#efeae2]/60 flex items-center gap-3 cursor-pointer shadow-sm border border-emerald-200 transition hover:scale-[0.99]">
+                                    <div class="w-11 h-11 rounded-full bg-[#25d366] text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-black text-slate-800 truncate">م. أحمد سامي</span>
+                                            <span class="text-[9px] text-emerald-700 font-bold">11:45 ص</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 truncate mt-0.5 flex items-center gap-1">
+                                            <i class="fa-solid fa-check-double text-blue-500 text-[10px]"></i>
+                                            <span>جاهز للمعاينة يوم الثلاثاء</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div onclick="selectActiveChat('نادية الشربيني', 'Messenger')" class="p-3 rounded-2xl bg-blue-50/60 flex items-center gap-3 cursor-pointer hover:bg-blue-100/50 transition border border-blue-200 shadow-sm">
+                                    <div class="w-11 h-11 rounded-full bg-[#0084ff] text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                                        <i class="fa-brands fa-facebook-messenger"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-black text-slate-800 truncate">نادية الشربيني</span>
+                                            <span class="text-[9px] text-blue-600 font-bold">أمس</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 truncate mt-0.5">بانتظار جدول أقساط لافيستا سيتي...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-8 bg-white rounded-[32px] border-2 border-white shadow-clay-card-flat flex flex-col justify-between overflow-hidden" id="chatMainBoxContainer">
+                            <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-white shadow-xs" id="chatRealHeader">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-base shadow-sm bg-[#25d366]" id="chatHeaderIconBadge">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-black text-slate-800" id="chatActiveName">م. أحمد سامي</h4>
+                                        <span class="text-[10px] text-emerald-600 font-bold block" id="chatActivePlatform">متصل الآن عبر WhatsApp Cloud</span>
+                                    </div>
+                                </div>
+                                <button onclick="triggerToast('تمت محاكاة رد العميل لحظياً عبر Webhook')" class="text-[10px] bg-emerald-50 text-emerald-700 font-black px-3 py-1.5 rounded-xl border border-emerald-200 shadow-xs hover:bg-emerald-100 transition">
+                                    ⚡ محاكاة رد العميل
+                                </button>
+                            </div>
+
+                            <div class="whatsapp-bg flex-1 p-5 overflow-y-auto space-y-3" id="chatMessagesArea">
+                                <div class="max-w-[70%] p-3 rounded-2xl rounded-tl-none bg-white text-slate-800 text-xs font-bold shadow-sm border border-slate-200/60 leading-relaxed">
+                                    السلام عليكم، هل متاح معاينة لوحدات كمبوند بادية بالم هيلز هذا الأسبوع؟
+                                    <span class="block text-[9px] text-slate-400 text-left mt-1">11:40 ص</span>
+                                </div>
+                                <div class="max-w-[70%] p-3 rounded-2xl rounded-tr-none bg-[#d9fdd3] text-slate-800 text-xs font-bold mr-auto shadow-sm border border-emerald-200/50 leading-relaxed" id="agentBubbleSample">
+                                    أهلاً بحضرتك م. أحمد، نعم تم تنسيق الموعد يوم الثلاثاء الساعة 3:00 عصراً مع فريق المعاينات.
+                                    <span class="block text-[9px] text-emerald-700 text-left mt-1 flex items-center justify-end gap-1">
+                                        <span>11:42 ص</span> <i class="fa-solid fa-check-double text-blue-500"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+                                <input type="text" id="chatInputField" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="اكتب رسالتك للعميل مباشرة..." class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500">
+                                <button onclick="sendChatMessage()" class="w-10 h-10 rounded-2xl bg-[#25d366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-sm transition" id="chatSendButton">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9. شاشة الرواتب وسجل الرواتب التفصيلي (للأدمن) -->
+                <section id="view-admin-salaries" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 class="text-base font-black text-clayTextDark">إدارة الرواتب والعمولات الشهرية وسجل المستحقات</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">يمكن للمدير إضافة راتب جديد، تعديل المستحقات، واعتماد التحويل المالي</p>
+                            </div>
+                            <button onclick="openSalaryModal()" class="px-5 py-2.5 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black text-xs rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                                + إضافة / تعديل مخصص راتب
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="text-clayTextMuted border-b border-slate-100 pb-3 font-black">
+                                        <th class="pb-3">الموظف</th>
+                                        <th class="pb-3">شهر الصرف</th>
+                                        <th class="pb-3">الراتب الأساسي</th>
+                                        <th class="pb-3">عمولة الصفقات (Won)</th>
+                                        <th class="pb-3">بونص الـ 120 رقماً</th>
+                                        <th class="pb-3">المستحق الإجمالي</th>
+                                        <th class="pb-3">حالة التحويل</th>
+                                        <th class="pb-3 text-center">سجل الرواتب</th>
+                                        <th class="pb-3 text-center">الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="salariesTableTbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. شاشة حسم النزاع والأرشيف المعتمد (للأدمن) -->
+                <section id="view-admin-duplicates" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <h3 class="text-base font-black text-clayTextDark">حسم النزاع والتكرار الخفي ونقل الصفقة للأرشيف</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                                        <th class="pb-3">العميل والهاتف</th>
+                                        <th class="pb-3">السيلر 1 (الأسبق)</th>
+                                        <th class="pb-3">السيلر 2</th>
+                                        <th class="pb-3">أنشطة سيلر 1</th>
+                                        <th class="pb-3">أنشطة سيلر 2</th>
+                                        <th class="pb-3 text-center">قرار الحسم للأرشيف</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="adminDuplicatesTbody">
+                                    <tr>
+                                        <td class="py-4"><strong>أحمد سامي</strong><span class="block text-clayTextMuted text-[11px]">01068767403</span></td>
+                                        <td class="py-4 text-clayCoral">محمد علي<br><small class="text-clayTextMuted">10 أغسطس</small></td>
+                                        <td class="py-4 text-clayCoral">بسمة خلف<br><small class="text-clayTextMuted">16 أغسطس</small></td>
+                                        <td class="py-4 text-clayTextMuted">2 مكالمات (لم يرد)</td>
+                                        <td class="py-4 text-emerald-600 font-black">12 مكالمة + موعد معاينة</td>
+                                        <td class="py-4 text-center space-x-1 space-x-reverse">
+                                            <button onclick="resolveDealToArchive('بسمة خلف', 'أحمد سامي', '01068767403')" class="px-3 py-1 bg-gradient-to-r from-clayPeach to-clayCoral text-white rounded-xl text-xs font-black shadow-clay-pill">حسم لبسمة ونقل للأرشيف</button>
+                                            <button onclick="resolveDealToArchive('محمد علي', 'أحمد سامي', '01068767403')" class="px-3 py-1 bg-white border border-slate-200 text-clayTextDark rounded-xl text-xs font-black shadow-sm">حسم لمحمد</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100">
+                            <h4 class="text-xs font-black text-emerald-800 mb-3 flex items-center gap-1.5">
+                                <i class="fa-solid fa-box-archive text-emerald-600"></i>
+                                <span>الأرشيف المعتمد للصفقات المحسومة</span>
+                            </h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right text-xs">
+                                    <thead>
+                                        <tr class="text-clayTextMuted border-b border-slate-100 pb-2">
+                                            <th>العميل</th>
+                                            <th>السيلر الفائز</th>
+                                            <th>قيمة الصفقة</th>
+                                            <th>تاريخ الاعتماد</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="approvedArchiveTbody" class="divide-y divide-slate-100 font-bold text-clayTextDark">
+                                        <tr>
+                                            <td class="py-3">محمود العسلي</td>
+                                            <td class="py-3 text-clayCoral font-black">بسمة خلف</td>
+                                            <td class="py-3 font-black">4,500,000 ج.م</td>
+                                            <td class="py-3 text-slate-400">2026-09-02</td>
+                                            <td class="py-3"><span class="bg-clayMint text-emerald-800 px-2.5 py-0.5 rounded-full text-[10px] font-black">مكتمل ومؤرشف</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 11. شاشة سجل التدقيق العام (Audit Log للأدمن) -->
+                <section id="view-admin-audit-log" class="screen-view hidden space-y-6">
+                    <div class="bg-white rounded-[32px] p-6 border-2 border-white shadow-clay-card-flat space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 class="text-base font-black text-clayTextDark">سجل التدقيق الشامل (System Audit Log)</h3>
+                                <p class="text-xs text-clayTextMuted font-bold">توثيق بالثانية: من أضاف، من عدل، حالات الصفقات، وعمليات الحذف والتحويل المالي</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="date" id="auditDateFrom" onchange="filterAuditLogs()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1 text-xs font-bold shadow-clay-inset" title="من تاريخ">
+                                <input type="date" id="auditDateTo" onchange="filterAuditLogs()" class="bg-[#fbf6ef] border border-white rounded-2xl px-2 py-1 text-xs font-bold shadow-clay-inset" title="إلى تاريخ">
+                                <input type="text" id="auditSearchInput" onkeyup="filterAuditLogs()" placeholder="بحث في السجل..." class="bg-[#fbf6ef] border border-white rounded-2xl px-3 py-1 text-xs font-bold outline-none shadow-clay-inset">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="text-clayTextMuted border-b border-slate-100 pb-3 font-black">
+                                        <th class="pb-3">المستخدم</th>
+                                        <th class="pb-3">نوع الإجراء</th>
+                                        <th class="pb-3">التفاصيل والتغيير</th>
+                                        <th class="pb-3">التوقيت والتاريخ</th>
+                                        <th class="pb-3">القناة / IP</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="adminAuditTbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- نافذة تعديل بيانات العميل -->
+    <div id="editCustomerModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-md w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-sm font-black text-clayTextDark">تعديل بيانات وحالة العميل</h3>
+                <button onclick="closeEditCustomerModal()" class="text-clayTextMuted hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleSaveEditedCustomer(event)" class="space-y-3 text-xs font-bold">
+                <input type="hidden" id="editCustId">
+                <div>
+                    <label class="block text-clayTextDark mb-1">اسم العميل *</label>
+                    <input type="text" id="editCustName" required class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-clayTextDark mb-1">رقم الهاتف *</label>
+                        <input type="tel" id="editCustPhone" required class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-clayTextDark mb-1">تاريخ الميلاد</label>
+                        <input type="date" id="editCustDob" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-clayTextDark mb-1">المشروع المستهدف *</label>
+                    <input type="text" id="editCustProject" required class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-clayTextDark mb-1">الميزانية</label>
+                        <input type="text" id="editCustBudget" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-clayTextDark mb-1">مرحلة الصفقة (الحالة) *</label>
+                        <select id="editCustStage" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                            <option value="جديد (New)">جديد (New)</option>
+                            <option value="تم التواصل">تم التواصل</option>
+                            <option value="معاينة مجدولة">معاينة مجدولة</option>
+                            <option value="متابعة مستمرة">متابعة مستمرة</option>
+                            <option value="تمت الصفقة (Won)">تمت الصفقة (Won)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                    حفظ التعديلات
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الحذف الإداري (Modal بدل Alert) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-sm w-full shadow-clay-card-flat space-y-4 text-center border-4 border-white">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-black text-clayTextDark mb-1">تأكيد الحذف النهائي</h3>
+                <p class="text-xs text-clayTextMuted font-bold" id="deleteModalText">هل أنت متأكد من حذف العميل نهائياً من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            </div>
+            <input type="hidden" id="pendingDeleteId">
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeDeleteConfirmModal()" class="py-3 bg-[#f6eee3] text-clayTextDark font-black text-xs rounded-2xl shadow-clay-soft hover:shadow-clay-inset transition">
+                    إلغاء
+                </button>
+                <button onclick="confirmDeleteCustomer()" class="py-3 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-2xl shadow transition">
+                    تأكيد الحذف
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة وتعديل راتب موظف -->
+    <div id="salaryModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-md w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-sm font-black text-clayTextDark">إضافة / تعديل مخصص راتب وعمولة</h3>
+                <button onclick="closeSalaryModal()" class="text-clayTextMuted hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleSaveSalary(event)" class="space-y-3 text-xs font-bold">
+                <div>
+                    <label class="block text-clayTextDark mb-1">الموظف *</label>
+                    <select id="salEmpSelect" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                        <option value="بسمة خلف">بسمة خلف</option>
+                        <option value="كريم عادل">كريم عادل</option>
+                        <option value="محمد علي">محمد علي</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-clayTextDark mb-1">شهر الصرف</label>
+                        <input type="month" id="salMonth" required value="2026-09" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-clayTextDark mb-1">الراتب الأساسي</label>
+                        <input type="number" id="salBaseInput" required value="12000" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-clayTextDark mb-1">عمولة الـ Won</label>
+                        <input type="number" id="salCommInput" value="24500" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-clayTextDark mb-1">بونص التارجت</label>
+                        <input type="number" id="salBonusInput" value="4000" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-clayTextDark mb-1">حالة التحويل البنكي</label>
+                    <select id="salStatusSelect" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset font-bold">
+                        <option value="تم التحويل">تم التحويل (Transferred)</option>
+                        <option value="قيد المراجعة">قيد المراجعة (Pending)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                    حفظ مخصص الراتب
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة سجل الرواتب التاريخي للموظف -->
+    <div id="salaryHistoryModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-xl w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-sm font-black text-clayTextDark" id="salHistoryTitle">سجل رواتب الموظف</h3>
+                <button onclick="closeSalaryHistoryModal()" class="text-clayTextMuted hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                <table class="w-full text-right text-xs">
+                    <thead>
+                        <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                            <th class="pb-2">الشهر</th>
+                            <th class="pb-2">الأساسي</th>
+                            <th class="pb-2">العمولة</th>
+                            <th class="pb-2">الإجمالي</th>
+                            <th class="pb-2">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="salHistoryTbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة فحص الحضور للموظف -->
+    <div id="employeeAttendanceModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-2xl w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-black text-clayTextDark" id="modalEmpName">سجل دوام: بسمة خلف</h3>
+                    <span class="text-xs text-clayCoral font-bold" id="modalEmpRole">Senior Sales Specialist</span>
+                </div>
+                <button onclick="closeEmployeeAttendanceModal()" class="text-clayTextMuted hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-3 bg-clayMint/50 rounded-2xl shadow-clay-soft border border-white">
+                    <span class="text-[10px] font-bold text-clayTextMuted block">الحضور الفعلي</span>
+                    <strong class="text-lg font-black text-emerald-800" id="modalEmpPresent">22 يوم</strong>
+                </div>
+                <div class="p-3 bg-clayPeach/30 rounded-2xl shadow-clay-soft border border-white">
+                    <span class="text-[10px] font-bold text-clayTextMuted block">أيام الغياب</span>
+                    <strong class="text-lg font-black text-rose-600" id="modalEmpAbsent">2 يوم</strong>
+                </div>
+                <div class="p-3 bg-clayYellow/40 rounded-2xl shadow-clay-soft border border-white">
+                    <span class="text-[10px] font-bold text-clayTextMuted block">الالتزام بالـ 8 ساعات</span>
+                    <strong class="text-lg font-black text-amber-800" id="modalEmpCommitment">98%</strong>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                <table class="w-full text-right text-xs">
+                    <thead>
+                        <tr class="text-clayTextMuted border-b border-slate-100 pb-2 font-black">
+                            <th class="pb-2">التاريخ</th>
+                            <th class="pb-2">البداية</th>
+                            <th class="pb-2">الانصراف</th>
+                            <th class="pb-2">الساعات</th>
+                            <th class="pb-2">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-bold text-clayTextDark" id="modalEmpLogsTbody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-left pt-2">
+                <button onclick="closeEmployeeAttendanceModal()" class="px-5 py-2 bg-[#f6eee3] text-clayTextDark rounded-xl text-xs font-black shadow-clay-soft hover:shadow-clay-inset">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تسجيل نتيجة مكالمة للسيلر -->
+    <div id="callModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-md w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-sm font-black text-clayTextDark" id="callModalTitle">توثيق نتيجة المكالمة</h3>
+                <button onclick="closeCallModal()" class="text-clayTextMuted hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-bold">
+                <div>
+                    <label class="block text-clayTextDark mb-1">نتيجة الاتصال *</label>
+                    <select id="callResultSelect" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 font-bold outline-none shadow-clay-inset">
+                        <option value="لم يرد (No Answer)">لم يرد (No Answer)</option>
+                        <option value="الهاتف مغلق / غير متاح">الهاتف مغلق / غير متاح</option>
+                        <option value="مهتم وتم تحديد موعد معاينة">مهتم وتم تحديد موعد معاينة</option>
+                        <option value="طلب إعادة الاتصال لاحقاً">طلب إعادة الاتصال لاحقاً</option>
+                        <option value="غير مهتم حالياً">غير مهتم حالياً</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-clayTextDark mb-1">ملاحظات المكالمة</label>
+                    <textarea id="callNotesInput" rows="2" placeholder="اكتب ما تم في المكالمة..." class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset"></textarea>
+                </div>
+                <button onclick="saveCallRecord()" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                    حفظ وتوثيق المكالمة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة صفقة جديدة للسيلر -->
+    <div id="dealModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[36px] p-6 max-w-md w-full shadow-clay-card-flat space-y-4 text-right border-4 border-white">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-sm font-black text-clayTextDark">تسجيل عميل جديد (Blind Duplicate)</h3>
+                <button onclick="closeDealModal()" class="text-clayTextMuted hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleCreateDeal(event)" class="space-y-3 text-xs font-bold">
+                <div>
+                    <label class="block text-clayTextDark mb-1">اسم العميل بالكامل *</label>
+                    <input type="text" id="dealCustName" required placeholder="مثال: رامي صبري" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-clayTextDark mb-1">رقم الهاتف *</label>
+                        <input type="tel" id="dealCustPhone" required placeholder="01xxxxxxxxx" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                    </div>
+                    <div>
+                        <label class="block text-clayTextDark mb-1">تاريخ الميلاد *</label>
+                        <input type="date" id="dealCustDob" required value="1992-05-14" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-clayTextDark mb-1">المشروع المستهدف *</label>
+                    <input type="text" id="dealCustProject" required placeholder="مثال: لافيستا سيتي العاصمة" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                </div>
+                <div>
+                    <label class="block text-clayTextDark mb-1">نطاق الميزانية</label>
+                    <input type="text" id="dealCustBudget" value="3.5M - 5M ج.م" class="w-full bg-[#fbf6ef] border border-white rounded-2xl p-2.5 outline-none shadow-clay-inset">
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-clayPeach to-clayCoral text-white font-black rounded-2xl shadow-clay-pill hover:opacity-95 transition">
+                    حفظ الصفقة
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- صندوق الإشعارات المنبثقة -->
+    <div id="toastBox" class="fixed bottom-6 left-6 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // ==========================================
+        // 1. حالة النظام والمتغيرات (State Store)
+        // ==========================================
+        let currentUserRole = 'admin';
+        let isDrawerCollapsed = false;
+        let selectedDealId = 1;
+        let checkInTimestamp = null;
+        let unreadNotifCount = 3;
+
+        let registeredUsers = [
+            { id: 1, name: "بسمة خلف", email: "basma@crm.com", phone: "01068767403", role: "Seller", salary: 12000, target: 120, status: "نشط" },
+            { id: 2, name: "كريم عادل", email: "karim@crm.com", phone: "01122334455", role: "Seller", salary: 9000, target: 120, status: "نشط" },
+            { id: 3, name: "محمد علي", email: "mohamed@crm.com", phone: "01288776655", role: "Seller", salary: 9000, target: 120, status: "نشط" }
+        ];
+
+        let dealsDatabase = [
+            { id: 1, name: "محمود العسلي", phone: "01099887766", dob: "1988-11-20", project: "بادية بالم هيلز", budget: "3.5M - 5M", stage: "تمت الصفقة (Won)", result: "مهتم وتم تحديد موعد", calls: 8, seller: "بسمة خلف", dateAdded: "2026-08-20" },
+            { id: 2, name: "سارة المهدي", phone: "01122334455", dob: "1995-02-10", project: "لافيستا سيتي", budget: "6M - 8M", stage: "معاينة مجدولة", result: "طلب إعادة الاتصال", calls: 14, seller: "بسمة خلف", dateAdded: "2026-08-25" },
+            { id: 3, name: "أحمد سامي", phone: "01068767403", dob: "1990-07-15", project: "سيليا طلعت مصطفى", budget: "3M - 4.5M", stage: "تم التواصل", result: "لم يرد (No Answer)", calls: 6, seller: "بسمة خلف", dateAdded: "2026-09-02" },
+            { id: 4, name: "ياسر جلال", phone: "01288776655", dob: "1984-09-01", project: "ماونتن فيو", budget: "2.8M - 4M", stage: "متابعة مستمرة", result: "الهاتف مغلق", calls: 19, seller: "كريم عادل", dateAdded: "2026-06-04" }
+        ];
+
+        let salariesData = [
+            { id: 1, name: "بسمة خلف", month: "2026-09", base: 12000, commission: 24500, bonus: 4000, status: "تم التحويل" },
+            { id: 2, name: "كريم عادل", month: "2026-09", base: 9000, commission: 14000, bonus: 2000, status: "تم التحويل" },
+            { id: 3, name: "محمد علي", month: "2026-09", base: 9000, commission: 6500, bonus: 0, status: "قيد المراجعة" }
+        ];
+
+        let auditLogs = [
+            { user: "بسمة خلف (Seller)", action: "توثيق مكالمة", details: "مكالمة مع أحمد سامي: لم يرد", time: "11:20:14", date: "2026-09-05", ip: "192.168.1.45" },
+            { user: "م. أحمد رشاد (Admin)", action: "إضافة مستخدم", details: "إضافة حساب موظف جديد", time: "10:10:02", date: "2026-09-05", ip: "192.168.1.10" },
+            { user: "النظام الآلي (System)", action: "فحص الـ 90 يوماً", details: "تنبيه باقتراب تدوير صفقة ياسر جلال", time: "09:00:00", date: "2026-09-04", ip: "Server Job" }
+        ];
+
+        let attendanceRecords = [
+            { date: "2026-09-04", inTime: "09:00 ص", outTime: "05:05 م", hours: "8 ساعات و 5 دقائق", status: "مكتمل (8h+)" },
+            { date: "2026-09-03", inTime: "08:55 ص", outTime: "05:10 م", hours: "8 ساعات و 15 دقيقة", status: "مكتمل (8h+)" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderUsersTable();
+            renderSellerDeals();
+            renderAdminMonitoringDeals();
+            renderSalaries();
+            renderAuditLogs();
+            renderAttendanceTable();
+            initClayCharts();
+        });
+
+        // ==========================================
+        // 2. التحكم بالـ Drawer والتنقل بين الشاشات
+        // ==========================================
+        function toggleDrawer() {
+            const drawer = document.getElementById('mainDrawer');
+            isDrawerCollapsed = !isDrawerCollapsed;
+            drawer.classList.toggle('drawer-collapsed', isDrawerCollapsed);
+        }
+
+        function switchTab(tabKey) {
+            document.querySelectorAll('.screen-view').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active-clay-tab'));
+
+            const target = document.getElementById(`view-${tabKey}`);
+            if(target) target.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`btn-${tabKey}`);
+            if(activeBtn) activeBtn.classList.add('active-clay-tab');
+
+            const titles = {
+                'seller-deals': 'صفقاتي وتوثيق المكالمات',
+                'seller-attendance': 'تسجيل الوردية الذكي',
+                'seller-calendar': 'المواعيد والمعاينات',
+                'chat': 'صندوق المحادثات (WhatsApp & Messenger)',
+                'admin-analytics': 'Dashboard (Analytics)',
+                'admin-users-manage': 'إضافة وإدارة المستخدمين',
+                'admin-monitoring': 'متابعة صفقات السيلرز',
+                'admin-staff-attendance': 'سجل حضور وغياب الموظفين',
+                'admin-salaries': 'سجل الرواتب والعمولات',
+                'admin-duplicates': 'حسم النزاع والأرشيف المعتمد',
+                'admin-audit-log': 'سجل التدقيق الشامل'
+            };
+            if(titles[tabKey]) {
+                document.getElementById('headerTitle').innerText = titles[tabKey];
+            }
+        }
+
+        // ==========================================
+        // 3. عزل الصلاحيات التام (Login Role Switcher)
+        // ==========================================
+        function handleLoginSubmit() {
+            const role = document.getElementById('loginRole').value;
+            currentUserRole = role;
+
+            if(role === 'admin') {
+                document.getElementById('headerTitle').innerText = "Dashboard (Admin)";
+                document.getElementById('sidebarGreeting').innerText = "Hi, Ahmed! 👑";
+                document.getElementById('headerUserAvatar').src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Ahmed&backgroundColor=d9e8e2";
+                document.getElementById('avatarImage').src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Ahmed&backgroundColor=d9e8e2";
+
+                document.getElementById('adminNavGroup').classList.remove('hidden');
+                document.getElementById('sellerNavSection').classList.add('hidden');
+
+                switchTab('admin-analytics');
+            } else {
+                document.getElementById('headerTitle').innerText = "Dashboard (Seller)";
+                document.getElementById('sidebarGreeting').innerText = "Hi, Basma! 🌸";
+                document.getElementById('headerUserAvatar').src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Mia&backgroundColor=d9e8e2";
+                document.getElementById('avatarImage').src = "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Mia&backgroundColor=d9e8e2";
+
+                document.getElementById('adminNavGroup').classList.add('hidden');
+                document.getElementById('sellerNavSection').classList.remove('hidden');
+
+                switchTab('seller-deals');
+            }
+
+            document.getElementById('authScreen').classList.add('opacity-0', 'pointer-events-none');
+            triggerToast(`تم الدخول بنجاح بصلاحية: ${role === 'admin' ? 'الإدارة والرقابة الشاملة' : 'مسؤول المبيعات'}`);
+        }
+
+        function logout() {
+            document.getElementById('authScreen').classList.remove('opacity-0', 'pointer-events-none');
+            triggerToast('تم تسجيل الخروج بنجاح.');
+        }
+
+        // ==========================================
+        // 4. محرك البحث والفلاتر الفعالة
+        // ==========================================
+        function handleGlobalSearch() {
+            const query = document.getElementById('globalTopSearch').value.toLowerCase().trim();
+            if (currentUserRole === 'seller') {
+                switchTab('seller-deals');
+                document.getElementById('sellerSearchInput').value = query;
+                filterSellerDeals();
+            } else {
+                switchTab('admin-monitoring');
+                document.getElementById('adminDealsSearchInput').value = query;
+                filterAdminMonitoringDeals();
+            }
+        }
+
+        function filterSellerDeals() {
+            const query = (document.getElementById('sellerSearchInput').value || '').toLowerCase().trim();
+            const stage = document.getElementById('sellerStageFilter').value;
+            const dateFrom = document.getElementById('sellerDateFrom').value;
+            const dateTo = document.getElementById('sellerDateTo').value;
+
+            const filtered = dealsDatabase.filter(d => {
+                const matchSeller = (d.seller === 'بسمة خلف');
+                const matchQuery = !query || 
+                    d.name.toLowerCase().includes(query) || 
+                    d.phone.includes(query) || 
+                    d.project.toLowerCase().includes(query);
+                const matchStage = (stage === 'All') || (d.stage === stage);
+                  
+                let matchDate = true;
+                if (dateFrom && d.dateAdded) matchDate = matchDate && (d.dateAdded >= dateFrom);
+                if (dateTo && d.dateAdded) matchDate = matchDate && (d.dateAdded <= dateTo);
+
+                return matchSeller && matchQuery && matchStage && matchDate;
+            });
+
+            renderSellerDeals(filtered);
+        }
+
+        function filterAdminMonitoringDeals() {
+            const query = (document.getElementById('adminDealsSearchInput').value || '').toLowerCase().trim();
+            const seller = document.getElementById('adminSellerFilter').value;
+            const stage = document.getElementById('adminStageFilter').value;
+            const dateFrom = document.getElementById('adminDateFrom').value;
+            const dateTo = document.getElementById('adminDateTo').value;
+
+            const filtered = dealsDatabase.filter(d => {
+                const matchQuery = !query || 
+                    d.name.toLowerCase().includes(query) || 
+                    d.phone.includes(query) || 
+                    d.project.toLowerCase().includes(query);
+                const matchSeller = (seller === 'All') || (d.seller === seller);
+                const matchStage = (stage === 'All') || (d.stage === stage);
+
+                let matchDate = true;
+                if (dateFrom && d.dateAdded) matchDate = matchDate && (d.dateAdded >= dateFrom);
+                if (dateTo && d.dateAdded) matchDate = matchDate && (d.dateAdded <= dateTo);
+
+                return matchQuery && matchSeller && matchStage && matchDate;
+            });
+
+            renderAdminMonitoringDeals(filtered);
+        }
+
+        function filterAuditLogs() {
+            const q = (document.getElementById('auditSearchInput').value || '').toLowerCase().trim();
+            const dateFrom = document.getElementById('auditDateFrom').value;
+            const dateTo = document.getElementById('auditDateTo').value;
+
+            const filtered = auditLogs.filter(l => {
+                const matchText = !q || l.user.toLowerCase().includes(q) || l.action.toLowerCase().includes(q) || l.details.toLowerCase().includes(q);
+                let matchDate = true;
+                if (dateFrom && l.date) matchDate = matchDate && (l.date >= dateFrom);
+                if (dateTo && l.date) matchDate = matchDate && (l.date <= dateTo);
+                return matchText && matchDate;
+            });
+            renderAuditLogs(filtered);
+        }
+
+        // ==========================================
+        // 5. شاشة المواعيد وصندوق المحادثات والواتساب والماسنجر
+        // ==========================================
+        function handleScheduleMeeting(e) {
+            e.preventDefault();
+            const client = document.getElementById('meetClientName').value;
+            const date = document.getElementById('meetDate').value;
+            const time = document.getElementById('meetTime').value;
+            const type = document.getElementById('meetType').value;
+
+            const container = document.getElementById('meetingsListContainer');
+            const item = document.createElement('div');
+            item.className = "p-3.5 bg-[#fbf6ef] border-2 border-white rounded-2xl flex justify-between items-center text-xs font-bold shadow-clay-soft";
+            item.innerHTML = `
+                <div>
+                    <div class="font-black text-clayTextDark">${type}: ${client}</div>
+                    <div class="text-[10px] text-clayCoral mt-0.5">التاريخ: ${date} • ${time}</div>
+                </div>
+                <span class="bg-clayMint text-emerald-800 text-[10px] px-2.5 py-1 rounded-xl font-black">مؤكد</span>
+            `;
+            container.prepend(item);
+            e.target.reset();
+            triggerToast(`تم حجز موعد (${type}) مع العميل ${client} بنجاح!`);
+        }
+
+        let currentActivePlatform = 'WhatsApp';
+
+        function selectActiveChat(name, platform) {
+            currentActivePlatform = platform;
+            document.getElementById('chatActiveName').innerText = name;
+            const iconBadge = document.getElementById('chatHeaderIconBadge');
+            const sendBtn = document.getElementById('chatSendButton');
+            const chatArea = document.getElementById('chatMessagesArea');
+            const platformText = document.getElementById('chatActivePlatform');
+
+            if(platform === 'WhatsApp') {
+                platformText.innerText = 'متصل الآن عبر WhatsApp Cloud';
+                platformText.className = 'text-[10px] text-emerald-600 font-bold block';
+                iconBadge.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white text-base shadow-sm bg-[#25d366]';
+                iconBadge.innerHTML = '<i class="fa-brands fa-whatsapp"></i>';
+                sendBtn.className = 'w-10 h-10 rounded-2xl bg-[#25d366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-sm transition';
+                chatArea.className = 'whatsapp-bg flex-1 p-5 overflow-y-auto space-y-3';
+                chatArea.innerHTML = `
+                    <div class="max-w-[70%] p-3 rounded-2xl rounded-tl-none bg-white text-slate-800 text-xs font-bold shadow-sm border border-slate-200/60 leading-relaxed">
+                        السلام عليكم، هل متاح معاينة لوحدات كمبوند بادية بالم هيلز هذا الأسبوع؟
+                        <span class="block text-[9px] text-slate-400 text-left mt-1">11:40 ص</span>
+                    </div>
+                    <div class="max-w-[70%] p-3 rounded-2xl rounded-tr-none bg-[#d9fdd3] text-slate-800 text-xs font-bold mr-auto shadow-sm border border-emerald-200/50 leading-relaxed">
+                        أهلاً بحضرتك م. أحمد، نعم تم تنسيق الموعد يوم الثلاثاء الساعة 3:00 عصراً.
+                        <span class="block text-[9px] text-emerald-700 text-left mt-1 flex items-center justify-end gap-1">
+                            <span>11:42 ص</span> <i class="fa-solid fa-check-double text-blue-500"></i>
+                        </span>
+                    </div>
+                `;
+            } else {
+                platformText.innerText = 'نشط عبر Messenger فيسبوك';
+                platformText.className = 'text-[10px] text-blue-600 font-bold block';
+                iconBadge.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white text-base shadow-sm bg-[#0084ff]';
+                iconBadge.innerHTML = '<i class="fa-brands fa-facebook-messenger"></i>';
+                sendBtn.className = 'w-10 h-10 rounded-2xl bg-[#0084ff] hover:bg-blue-600 text-white flex items-center justify-center shadow-sm transition';
+                chatArea.className = 'bg-[#f0f2f5] flex-1 p-5 overflow-y-auto space-y-3';
+                chatArea.innerHTML = `
+                    <div class="max-w-[70%] p-3 rounded-2xl bg-[#e4e6eb] text-slate-800 text-xs font-bold leading-relaxed">
+                        مرحباً، أرجو إرسال جدول أقساط لافيستا سيتي بمقدم 10%.
+                        <span class="block text-[9px] text-slate-500 text-left mt-1">أمس 04:15 م</span>
+                    </div>
+                    <div class="max-w-[70%] p-3 rounded-2xl bg-gradient-to-r from-[#0084ff] to-[#00a6ff] text-white text-xs font-bold mr-auto leading-relaxed shadow-sm">
+                        أهلاً أ. نادية، أرسلنا لكِ الكتالوج وسنوافيكِ بعرض السداد فوراً.
+                        <span class="block text-[9px] text-blue-100 text-left mt-1">أمس 04:20 م</span>
+                    </div>
+                `;
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInputField');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const area = document.getElementById('chatMessagesArea');
+            const msg = document.createElement('div');
+            
+            if(currentActivePlatform === 'WhatsApp') {
+                msg.className = "max-w-[70%] p-3 rounded-2xl rounded-tr-none bg-[#d9fdd3] text-slate-800 text-xs font-bold mr-auto shadow-sm border border-emerald-200/50 leading-relaxed";
+                msg.innerHTML = `${text}<span class="block text-[9px] text-emerald-700 text-left mt-1 flex items-center justify-end gap-1"><span>الآن</span> <i class="fa-solid fa-check text-slate-400"></i></span>`;
+            } else {
+                msg.className = "max-w-[70%] p-3 rounded-2xl bg-gradient-to-r from-[#0084ff] to-[#00a6ff] text-white text-xs font-bold mr-auto leading-relaxed shadow-sm";
+                msg.innerHTML = `${text}<span class="block text-[9px] text-blue-100 text-left mt-1">الآن</span>`;
+            }
+
+            area.appendChild(msg);
+            input.value = '';
+            area.scrollTop = area.scrollHeight;
+            triggerToast(`تم الإرسال بنجاح عبر سحابة ${currentActivePlatform}`);
+        }
+
+        // ==========================================
+        // 6. تفاعل الإشعارات
+        // ==========================================
+        function toggleNotificationDropdown() {
+            const menu = document.getElementById('notificationDropdownMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function markAsRead(element) {
+            if(!element.classList.contains('read-notif')) {
+                element.classList.add('read-notif', 'opacity-40', 'bg-slate-100', 'border-slate-200');
+                element.classList.remove('bg-clayYellow/40', 'bg-clayMint/60', 'bg-clayPeach/40');
+                unreadNotifCount = Math.max(0, unreadNotifCount - 1);
+                
+                const badge = document.getElementById('notifBadge');
+                if(unreadNotifCount > 0) {
+                    badge.innerText = unreadNotifCount;
+                } else {
+                    badge.classList.add('hidden');
+                }
+                document.getElementById('notifCountText').innerText = `${unreadNotifCount} غير مقروءة`;
+                triggerToast('تم تمييز الإشعار كمقروء');
+            }
+        }
+
+        // ==========================================
+        // 7. شاشة إضافة وإدارة المستخدمين
+        // ==========================================
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableTbody');
+            tbody.innerHTML = '';
+            registeredUsers.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3">
+                        <span class="block font-black text-clayTextDark">${u.name}</span>
+                        <span class="text-clayTextMuted text-[11px]">${u.email}</span>
+                    </td>
+                    <td class="py-3"><span class="px-2.5 py-1 rounded-xl text-[10px] font-black ${u.role === 'Admin' ? 'bg-clayPeach/40 text-clayCoral' : 'bg-clayMint text-emerald-800'}">${u.role}</span></td>
+                    <td class="py-3">${u.salary.toLocaleString()} ج.م</td>
+                    <td class="py-3 font-black">${u.target} عميل/شهر</td>
+                    <td class="py-3"><span class="text-emerald-700 font-black">${u.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('totalUsersBadge').innerText = `${registeredUsers.length} مستخدمين`;
+        }
+
+        function handleCreateUserSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('newUserName').value;
+            const email = document.getElementById('newUserEmail').value;
+            const phone = document.getElementById('newUserPhone').value;
+            const role = document.getElementById('newUserRole').value;
+            const salary = parseInt(document.getElementById('newUserSalary').value);
+            const target = parseInt(document.getElementById('newUserTarget').value);
+
+            registeredUsers.push({
+                id: registeredUsers.length + 1,
+                name: name,
+                email: email,
+                phone: phone,
+                role: role,
+                salary: salary,
+                target: target,
+                status: "نشط"
+            });
+
+            auditLogs.unshift({
+                user: "م. أحمد رشاد (Admin)",
+                action: "إضافة مستخدم",
+                details: `تم إنشاء حساب جديد: ${name} (${role})`,
+                time: new Date().toLocaleTimeString('ar-EG'),
+                date: new Date().toISOString().split('T')[0],
+                ip: "192.168.1.10"
+            });
+
+            renderUsersTable();
+            renderAuditLogs();
+            e.target.reset();
+            triggerToast(`تمت إضافة وتفعيل المستخدم (${name}) بنجاح!`);
+        }
+
+        // ==========================================
+        // 8. فحص سجل الحضور عند النقر على الكارد
+        // ==========================================
+        function openEmployeeAttendanceModal(empName, empRole, presentDays, absentDays, commitment) {
+            document.getElementById('modalEmpName').innerText = `سجل دوام: ${empName}`;
+            document.getElementById('modalEmpRole').innerText = empRole;
+            document.getElementById('modalEmpPresent').innerText = `${presentDays} يوم`;
+            document.getElementById('modalEmpAbsent').innerText = `${absentDays} أيام`;
+            document.getElementById('modalEmpCommitment').innerText = commitment;
+
+            const tbody = document.getElementById('modalEmpLogsTbody');
+            tbody.innerHTML = `
+                <tr><td class="py-2.5">2026-09-04 (الخميس)</td><td class="py-2.5 text-clayCoral font-black">09:00 ص</td><td class="py-2.5">05:05 م</td><td class="py-2.5">8 ساعات و 5 دقائق</td><td><span class="text-emerald-700 font-bold">مكتمل (8h+)</span></td></tr>
+                <tr><td class="py-2.5">2026-09-03 (الأربعاء)</td><td class="py-2.5 text-clayCoral font-black">08:55 ص</td><td class="py-2.5">05:10 م</td><td class="py-2.5">8 ساعات و 15 دقيقة</td><td><span class="text-emerald-700 font-bold">مكتمل (8h+)</span></td></tr>
+                <tr><td class="py-2.5">2026-09-02 (الثلاثاء)</td><td class="py-2.5 text-rose-500">—</td><td class="py-2.5 text-rose-500">—</td><td class="py-2.5">0</td><td><span class="text-rose-600 font-bold">غياب (لم يسجل)</span></td></tr>
+                <tr><td class="py-2.5">2026-09-01 (الإثنين)</td><td class="py-2.5 text-clayCoral font-black">09:02 ص</td><td class="py-2.5">05:02 م</td><td class="py-2.5">8 ساعات</td><td><span class="text-emerald-700 font-bold">مكتمل (8h+)</span></td></tr>
+            `;
+
+            document.getElementById('employeeAttendanceModal').classList.remove('hidden');
+            document.getElementById('employeeAttendanceModal').classList.add('flex');
+        }
+
+        function closeEmployeeAttendanceModal() {
+            document.getElementById('employeeAttendanceModal').classList.add('hidden');
+            document.getElementById('employeeAttendanceModal').classList.remove('flex');
+        }
+
+        // ==========================================
+        // 9. الحضور والانصراف
+        // ==========================================
+        let currentInTimeStr = null;
+
+        function recordCheckIn() {
+            const now = new Date();
+            checkInTimestamp = now.getTime();
+            currentInTimeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+            const inBtn = document.getElementById('btnCheckIn');
+            inBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            inBtn.disabled = true;
+
+            const outBtn = document.getElementById('btnCheckOut');
+            outBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            outBtn.disabled = false;
+
+            document.getElementById('attendanceStatusMsg').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 ml-1"></i> الحالة: الوردية نشطة الآن منذ الساعة ${currentInTimeStr}`;
+            triggerToast(`تم تسجيل بداية الوردية (Check-In) الساعة: ${currentInTimeStr}`);
+        }
+
+        function recordCheckOut() {
+            if(!checkInTimestamp) {
+                triggerToast('عفواً، لم تقم بتسجيل بداية الدوام (Check-In) أولاً!', 'error');
+                return;
+            }
+            const now = new Date();
+            const hoursPassed = (now.getTime() - checkInTimestamp) / (1000 * 60 * 60);
+
+            if(hoursPassed < 8) {
+                const rem = (8 - hoursPassed).toFixed(1);
+                triggerToast(`عفواً، لا يمكن إنهاء الوردية قبل إتمام 8 ساعات عمل كاملة! (متبقي ${rem} ساعة)`, 'error');
+                return;
+            }
+
+            const outTimeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            
+            attendanceRecords.unshift({
+                date: new Date().toISOString().split('T')[0],
+                inTime: currentInTimeStr,
+                outTime: outTimeStr,
+                hours: "8 ساعات و 12 دقيقة",
+                status: "مكتمل (8h+)"
+            });
+            renderAttendanceTable();
+
+            triggerToast(`تم إنهاء الوردية (Check-Out) بنجاح الساعة: ${outTimeStr}. أتممت ساعات العمل المطلوبة!`);
+            checkInTimestamp = null;
+            currentInTimeStr = null;
+
+            document.getElementById('btnCheckIn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btnCheckIn').disabled = false;
+            document.getElementById('btnCheckOut').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btnCheckOut').disabled = true;
+            document.getElementById('attendanceStatusMsg').innerHTML = `<i class="fa-solid fa-circle-info text-clayCoral ml-1"></i> الحالة: تم إتمام وردية اليوم بنجاح.`;
+        }
+
+        function simulateCompleteShift() {
+            checkInTimestamp = new Date().getTime() - (9 * 60 * 60 * 1000); 
+            currentInTimeStr = "09:00 ص";
+            const outBtn = document.getElementById('btnCheckOut');
+            outBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            outBtn.disabled = false;
+
+            const inBtn = document.getElementById('btnCheckIn');
+            inBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            inBtn.disabled = true;
+
+            document.getElementById('attendanceStatusMsg').innerHTML = `<i class="fa-solid fa-bolt text-amber-500 ml-1"></i> الحالة: تم محاكاة مرور 8 ساعات بنجاح.`;
+            triggerToast('⚡ تم محاكاة إتمام 8 ساعات بنجاح! يمكنك الآن النقر على تسجيل نهاية الدوام.');
+        }
+
+        function renderAttendanceTable() {
+            const tbody = document.getElementById('sellerAttendanceLogsTbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            attendanceRecords.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 font-bold">${rec.date}</td>
+                    <td class="py-3 text-clayCoral font-black">${rec.inTime}</td>
+                    <td class="py-3 font-bold text-slate-700">${rec.outTime}</td>
+                    <td class="py-3 font-bold">${rec.hours}</td>
+                    <td class="py-3"><span class="bg-clayMint text-emerald-800 px-2.5 py-0.5 rounded-full text-[10px] font-black">${rec.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==========================================
+        // 10. صفقات السيلر وتوثيق المكالمات وحذف العميل (عبر Modal التأكيد بدلاً من Alert)
+        // ==========================================
+        function renderSellerDeals(data = null) {
+            const list = data || dealsDatabase.filter(d => d.seller === 'بسمة خلف');
+            const tbody = document.getElementById('sellerDealsTbody');
+            tbody.innerHTML = '';
+            
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-clayTextMuted">لا توجد نتائج مطابقة للبحث أو الفلترة.</td></tr>';
+                return;
+            }
+
+            list.forEach(deal => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3.5"><strong class="text-clayTextDark block">${deal.name}</strong><span class="text-clayTextMuted text-[11px]">${deal.phone}</span></td>
+                    <td class="py-3.5 text-slate-500 font-bold">${deal.dateAdded || '—'}</td>
+                    <td class="py-3.5 text-slate-500 font-bold">${deal.dob || '—'}</td>
+                    <td class="py-3.5 text-clayCoral font-black">${deal.project}</td>
+                    <td class="py-3.5">${deal.budget}</td>
+                    <td class="py-3.5"><span class="bg-clayPeach/30 text-clayCoral px-2.5 py-1 rounded-full text-[10px] font-black">${deal.stage}</span></td>
+                    <td class="py-3.5"><span class="bg-clayYellow text-amber-900 px-2 py-0.5 rounded-lg text-[10px] font-bold">${deal.result}</span></td>
+                    <td class="py-3.5 font-bold">${deal.calls} مكالمات</td>
+                    <td class="py-3.5 text-center space-x-1 space-x-reverse">
+                        <button onclick="openCallModal(${deal.id})" title="توثيق مكالمة" class="px-2.5 py-1 bg-white border border-clayPeach/50 text-clayCoral hover:bg-clayPeach hover:text-white rounded-xl font-bold shadow-xs transition">📞</button>
+                        <button onclick="openEditCustomerModal(${deal.id})" title="تعديل العميل" class="px-2.5 py-1 bg-[#f6eee3] text-clayTextDark hover:bg-white rounded-xl font-bold shadow-xs transition">✏️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAdminMonitoringDeals(data = null) {
+            const list = data || dealsDatabase;
+            const tbody = document.getElementById('adminMonitoringTbody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-clayTextMuted">لا توجد نتائج مطابقة للبحث أو الفلترة.</td></tr>';
+                return;
+            }
+
+            list.forEach(deal => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3.5"><strong class="text-clayTextDark block">${deal.name}</strong><span class="text-clayTextMuted text-[11px]">${deal.phone}</span></td>
+                    <td class="py-3.5 text-slate-500 font-bold">${deal.dateAdded || '—'}</td>
+                    <td class="py-3.5 text-clayCoral font-black">${deal.project}</td>
+                    <td class="py-3.5">${deal.budget}</td>
+                    <td class="py-3.5"><span class="bg-[#f6eee3] text-clayTextDark px-2 py-0.5 rounded-md text-[10px] font-bold">${deal.seller}</span></td>
+                    <td class="py-3.5"><span class="bg-clayMint text-emerald-800 px-2 py-0.5 rounded-full text-[10px]">${deal.stage}</span></td>
+                    <td class="py-3.5 text-center">
+                        <button onclick="triggerToast('بدء اتصال إداري مباشر مع العميل: ${deal.name}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
+                            <i class="fa-solid fa-phone mr-1"></i> اتصال
+                        </button>
+                    </td>
+                    <td class="py-3.5 text-center">
+                        <button onclick="openEditCustomerModal(${deal.id})" class="px-2.5 py-1 bg-[#f6eee3] text-clayTextDark hover:bg-white rounded-xl text-xs font-bold shadow-xs transition">
+                            ✏️ تعديل
+                        </button>
+                    </td>
+                    <td class="py-3.5 text-center">
+                        <button onclick="deleteCustomerPermanently(${deal.id})" class="px-2.5 py-1 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-trash mr-1"></i> حذف
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteCustomerPermanently(id) {
+            const deal = dealsDatabase.find(d => d.id === id);
+            if(!deal) return;
+            document.getElementById('pendingDeleteId').value = id;
+            document.getElementById('deleteModalText').innerText = `هل أنت متأكد من رغبتك في حذف العميل (${deal.name}) نهائياً من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.`;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+            document.getElementById('deleteConfirmModal').classList.add('flex');
+        }
+
+        function closeDeleteConfirmModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            document.getElementById('deleteConfirmModal').classList.remove('flex');
+        }
+
+        function confirmDeleteCustomer() {
+            const id = parseInt(document.getElementById('pendingDeleteId').value);
+            const deal = dealsDatabase.find(d => d.id === id);
+            
+            dealsDatabase = dealsDatabase.filter(d => d.id !== id);
+            filterAdminMonitoringDeals();
+            filterSellerDeals();
+
+            auditLogs.unshift({
+                user: "م. أحمد رشاد (Admin)",
+                action: "حذف عميل",
+                details: `تم حذف العميل ${deal ? deal.name : ''} نهائياً`,
+                time: new Date().toLocaleTimeString('ar-EG'),
+                date: new Date().toISOString().split('T')[0],
+                ip: "192.168.1.10"
+            });
+            renderAuditLogs();
+            closeDeleteConfirmModal();
+            triggerToast(`تم حذف العميل (${deal ? deal.name : ''}) نهائياً بنجاح.`);
+        }
+
+        function openCallModal(id) {
+            selectedDealId = id;
+            document.getElementById('callModal').classList.remove('hidden');
+            document.getElementById('callModal').classList.add('flex');
+        }
+
+        function closeCallModal() {
+            document.getElementById('callModal').classList.add('hidden');
+            document.getElementById('callModal').classList.remove('flex');
+        }
+
+        function saveCallRecord() {
+            const res = document.getElementById('callResultSelect').value;
+            const deal = dealsDatabase.find(d => d.id === selectedDealId);
+            if(deal) {
+                deal.result = res;
+                deal.calls += 1;
+                filterSellerDeals();
+                closeCallModal();
+                triggerToast(`تم حفظ وتوثيق المكالمة للعميل (${deal.name}): [${res}]`);
+            }
+        }
+
+        function openDealModal() {
+            document.getElementById('dealModal').classList.remove('hidden');
+            document.getElementById('dealModal').classList.add('flex');
+        }
+
+        function closeDealModal() {
+            document.getElementById('dealModal').classList.add('hidden');
+            document.getElementById('dealModal').classList.remove('flex');
+        }
+
+        function handleCreateDeal(e) {
+            e.preventDefault();
+            const name = document.getElementById('dealCustName').value;
+            const phone = document.getElementById('dealCustPhone').value;
+            const dob = document.getElementById('dealCustDob').value;
+            const project = document.getElementById('dealCustProject').value;
+            const budget = document.getElementById('dealCustBudget').value;
+
+            dealsDatabase.unshift({
+                id: dealsDatabase.length + 1,
+                name: name,
+                phone: phone,
+                dob: dob,
+                project: project,
+                budget: budget,
+                stage: "جديد (New)",
+                result: "طلب إعادة الاتصال",
+                calls: 1,
+                seller: "بسمة خلف",
+                dateAdded: new Date().toISOString().split('T')[0]
+            });
+
+            filterSellerDeals();
+            filterAdminMonitoringDeals();
+            closeDealModal();
+            triggerToast(`تم تسجيل العميل (${name}) بتاريخ ميلاد (${dob}) بنجاح!`);
+        }
+
+        function openEditCustomerModal(id) {
+            const deal = dealsDatabase.find(d => d.id === id);
+            if(!deal) return;
+            document.getElementById('editCustId').value = deal.id;
+            document.getElementById('editCustName').value = deal.name;
+            document.getElementById('editCustPhone').value = deal.phone;
+            document.getElementById('editCustDob').value = deal.dob || '1990-01-01';
+            document.getElementById('editCustProject').value = deal.project;
+            document.getElementById('editCustBudget').value = deal.budget;
+            document.getElementById('editCustStage').value = deal.stage;
+
+            document.getElementById('editCustomerModal').classList.remove('hidden');
+            document.getElementById('editCustomerModal').classList.add('flex');
+        }
+
+        function closeEditCustomerModal() {
+            document.getElementById('editCustomerModal').classList.add('hidden');
+            document.getElementById('editCustomerModal').classList.remove('flex');
+        }
+
+        function handleSaveEditedCustomer(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editCustId').value);
+            const deal = dealsDatabase.find(d => d.id === id);
+            if(deal) {
+                deal.name = document.getElementById('editCustName').value;
+                deal.phone = document.getElementById('editCustPhone').value;
+                deal.dob = document.getElementById('editCustDob').value;
+                deal.project = document.getElementById('editCustProject').value;
+                deal.budget = document.getElementById('editCustBudget').value;
+                deal.stage = document.getElementById('editCustStage').value;
+
+                renderSellerDeals();
+                renderAdminMonitoringDeals();
+                closeEditCustomerModal();
+                triggerToast(`تم تعديل بيانات العميل (${deal.name}) بنجاح!`);
+            }
+        }
+
+        // ==========================================
+        // 11. الرواتب وسجل الرواتب (مفعل بالكامل)
+        // ==========================================
+        function openSalaryModal() {
+            document.getElementById('salaryModal').classList.remove('hidden');
+            document.getElementById('salaryModal').classList.add('flex');
+        }
+
+        function closeSalaryModal() {
+            document.getElementById('salaryModal').classList.add('hidden');
+            document.getElementById('salaryModal').classList.remove('flex');
+        }
+
+        function handleSaveSalary(e) {
+            e.preventDefault();
+            const empName = document.getElementById('salEmpSelect').value;
+            const month = document.getElementById('salMonth').value;
+            const base = parseInt(document.getElementById('salBaseInput').value);
+            const comm = parseInt(document.getElementById('salCommInput').value);
+            const bonus = parseInt(document.getElementById('salBonusInput').value);
+            const status = document.getElementById('salStatusSelect').value;
+
+            salariesData.unshift({
+                id: salariesData.length + 1,
+                name: empName,
+                month: month,
+                base: base,
+                commission: comm,
+                bonus: bonus,
+                status: status
+            });
+
+            renderSalaries();
+            closeSalaryModal();
+            triggerToast(`تم حفظ وإضافة مخصص الراتب للموظف (${empName}) بنجاح!`);
+        }
+
+        function viewEmployeeSalaryHistory(empName) {
+            document.getElementById('salHistoryTitle').innerText = `سجل الرواتب المصروفة: ${empName}`;
+            const tbody = document.getElementById('salHistoryTbody');
+            tbody.innerHTML = '';
+
+            const history = salariesData.filter(s => s.name === empName);
+            if(history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-center text-clayTextMuted">لا توجد سجلات سابقة.</td></tr>';
+            } else {
+                history.forEach(h => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-2.5">${h.month}</td>
+                        <td class="py-2.5">${h.base.toLocaleString()} ج.م</td>
+                        <td class="py-2.5 text-emerald-700 font-bold">+${h.commission.toLocaleString()} ج.م</td>
+                        <td class="py-2.5 font-black text-clayCoral">${(h.base + h.commission + h.bonus).toLocaleString()} ج.م</td>
+                        <td class="py-2.5"><span class="px-2 py-0.5 rounded-full text-[10px] ${h.status === 'تم التحويل' ? 'bg-clayMint text-emerald-800' : 'bg-clayYellow text-amber-900'} font-bold">${h.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('salaryHistoryModal').classList.remove('hidden');
+            document.getElementById('salaryHistoryModal').classList.add('flex');
+        }
+
+        function closeSalaryHistoryModal() {
+            document.getElementById('salaryHistoryModal').classList.add('hidden');
+            document.getElementById('salaryHistoryModal').classList.remove('flex');
+        }
+
+        function renderSalaries() {
+            const tbody = document.getElementById('salariesTableTbody');
+            tbody.innerHTML = '';
+            salariesData.forEach(sal => {
+                const total = sal.base + sal.commission + sal.bonus;
+                const isDone = sal.status === 'تم التحويل';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3.5 font-black">${sal.name}</td>
+                    <td class="py-3.5 text-slate-500">${sal.month}</td>
+                    <td class="py-3.5">${sal.base.toLocaleString()} ج.م</td>
+                    <td class="py-3.5 text-emerald-700 font-black">+${sal.commission.toLocaleString()} ج.م</td>
+                    <td class="py-3.5 text-amber-700 font-black">+${sal.bonus.toLocaleString()} ج.م</td>
+                    <td class="py-3.5 font-black text-clayCoral">${total.toLocaleString()} ج.م</td>
+                    <td class="py-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-black ${isDone ? 'bg-clayMint text-emerald-800' : 'bg-clayYellow text-amber-900'}">${sal.status}</span></td>
+                    <td class="py-3.5 text-center">
+                        <button onclick="viewEmployeeSalaryHistory('${sal.name}')" class="px-2.5 py-1 bg-[#f6eee3] text-clayTextDark hover:bg-white rounded-xl font-bold shadow-xs transition">
+                            📜 السجل
+                        </button>
+                    </td>
+                    <td class="py-3.5 text-center">
+                        <button onclick="toggleSalaryTransfer(${sal.id})" class="px-3 py-1 rounded-xl font-black ${isDone ? 'bg-white border text-clayTextDark' : 'bg-emerald-600 text-white shadow-xs'}">
+                            ${isDone ? 'إلغاء التحويل' : 'تأكيد التحويل الآن'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleSalaryTransfer(id) {
+            const item = salariesData.find(x => x.id === id);
+            if(item) {
+                item.status = item.status === 'تم التحويل' ? 'قيد المراجعة' : 'تم التحويل';
+                renderSalaries();
+                triggerToast(`تم تحديث حالة التحويل للموظف (${item.name}) إلى: [${item.status}]`);
+            }
+        }
+
+        function resolveDealToArchive(winner, client, phone) {
+            const archiveTbody = document.getElementById('approvedArchiveTbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="py-3 font-black">${client} (${phone})</td>
+                <td class="py-3 text-clayCoral font-black">${winner}</td>
+                <td class="py-3 font-black">5,200,000 ج.م</td>
+                <td class="py-3 text-slate-400">اليوم</td>
+                <td class="py-3"><span class="bg-clayMint text-emerald-800 px-2.5 py-0.5 rounded-full text-[10px] font-black">مكتمل ومؤرشف</span></td>
+            `;
+            archiveTbody.prepend(tr);
+            document.getElementById('adminDuplicatesTbody').innerHTML = '<tr><td colspan="6" class="py-4 text-center text-clayTextMuted">تم حسم كافة النزاعات بنجاح.</td></tr>';
+            triggerToast(`تم حسم الصفقة لصالح (${winner}) ونقلها مباشرة إلى الأرشيف المعتمد!`);
+        }
+
+        function renderAuditLogs() {
+            const tbody = document.getElementById('adminAuditTbody');
+            tbody.innerHTML = '';
+            auditLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 font-black text-clayTextDark">${log.user}</td>
+                    <td class="py-3"><span class="bg-[#f6eee3] text-clayTextDark px-2 py-0.5 rounded-md">${log.action}</span></td>
+                    <td class="py-3">${log.details}</td>
+                    <td class="py-3 text-clayTextMuted">${log.date} ${log.time}</td>
+                    <td class="py-3 text-clayTextMuted">${log.ip}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==========================================
+        // 12. محراكات الرسوم البيانية المتعددة لداشبورد الأدمن
+        // ==========================================
+        function initClayCharts() {
+            const ctxGrowth = document.getElementById('chartAdminGrowthLine').getContext('2d');
+            new Chart(ctxGrowth, {
+                type: 'line',
+                data: {
+                    labels: ['مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر'],
+                    datasets: [
+                        {
+                            label: 'النمو الفعلي',
+                            data: [65, 85, 95, 145, 110],
+                            borderColor: '#f58a69',
+                            backgroundColor: 'rgba(245, 138, 105, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'المستهدف',
+                            data: [60, 80, 90, 120, 120],
+                            borderColor: '#88ab9d',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Tajawal', weight: 'bold' } } } },
+                    scales: {
+                        y: { grid: { color: '#f5eee6' }, ticks: { font: { family: 'Tajawal', weight: 'bold' } } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Tajawal', weight: 'bold' } } }
+                    }
+                }
+            });
+
+            const ctxStages = document.getElementById('chartAdminStagesDonut').getContext('2d');
+            new Chart(ctxStages, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Won', 'معاينات', 'تواصل', 'جديد'],
+                    datasets: [{
+                        data: [30, 35, 20, 15],
+                        backgroundColor: ['#f8b69b', '#88ab9d', '#fce3b8', '#bed3e8'],
+                        borderWidth: 4,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Tajawal', weight: 'bold' } } } }
+                }
+            });
+
+            const ctxSellers = document.getElementById('chartAdminSellersBar').getContext('2d');
+            new Chart(ctxSellers, {
+                type: 'bar',
+                data: {
+                    labels: ['بسمة خلف', 'كريم عادل', 'محمد علي'],
+                    datasets: [
+                        {
+                            label: 'المحقق فعلياً',
+                            data: [95, 82, 60],
+                            backgroundColor: '#f58a69',
+                            borderRadius: 10,
+                            barPercentage: 0.5
+                        },
+                        {
+                            label: 'المستهدف (تارجت 120)',
+                            data: [120, 120, 120],
+                            backgroundColor: '#d4ebd9',
+                            borderRadius: 10,
+                            barPercentage: 0.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Tajawal', weight: 'bold' } } } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f5eee6' }, ticks: { font: { family: 'Tajawal', weight: 'bold' } } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Tajawal', weight: 'bold' } } }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 13. نظام التنبيهات (Toast System)
+        // ==========================================
+        function triggerToast(msg, type = 'info') {
+            const box = document.getElementById('toastBox');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600 text-white' : 'bg-white text-clayTextDark border-2 border-white shadow-clay-card-flat';
+
+            toast.className = `${bgClass} px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-3`;
+            toast.innerHTML = `<span class="text-sm">🌸</span><span>${msg}</span>`;
+            box.appendChild(toast);
+
+            setTimeout(() => toast.classList.remove('translate-y-3'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        window.addEventListener('click', (e) => {
+            if(!e.target.closest('#notificationDropdownMenu') && !e.target.closest('button[onclick="toggleNotificationDropdown()"]')) {
+                document.getElementById('notificationDropdownMenu').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
